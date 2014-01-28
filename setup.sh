@@ -23,7 +23,6 @@ function install_nginx {
   apt-get -y install nginx
   sed -i "/worker_processes/cworker_processes `nproc`;"  /etc/nginx/nginx.conf
   rm /etc/nginx/sites-available/default
-  mkdir /var/www
 }
 
 function install_php {
@@ -37,8 +36,7 @@ function install_mysql {
 
 function add_static_website {
   domain_name=$1
-  mkdir /var/www
-  mkdir /var/www/$domain_name
+  mkdir -p /var/www/$domain_name
   echo "<html><title>My Website</title><body><h1>My Website $domain_name </h1>Welcome it works</body></html>" > /var/www/$domain_name/index.html
   cat > /etc/nginx/sites-enabled/$domain_name.conf <<END
 server {
@@ -53,8 +51,7 @@ END
 
 function add_php_website {
   domain_name=$1
-  mkdir /var/www
-  mkdir /var/www/$domain_name
+  mkdir -p /var/www/$domain_name
   echo "<?php phpinfo(); ?>" > /var/www/$domain_name/index.html
   cat > /etc/nginx/sites-enabled/$domain_name.conf <<END
 server {
