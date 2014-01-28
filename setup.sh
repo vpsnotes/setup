@@ -26,17 +26,13 @@ function install_nginx {
   mkdir /var/www
 }
 
-function help {
-  echo -en "\ec"
-  echo "-------------------------------------------------------------------------------------------------------"
-  echo "bash setup.sh init                                                                                     "
-  echo "	Initialize the  System - Update the system, remove unwanted programs and install useful ones   "
-  echo "bash setup.sh install nginx                                                                            "
-  echo "	Install NGINX webserver                                                                        "
-  echo "bash setup.sh add_static_website domain.tld                                                            "
-  echo "	Setup a static website given a domain name.                                                    "
-  echo "	E.g. bash setup.sh add_static_website abc.com                                                  "
-  echo "-------------------------------------------------------------------------------------------------------"
+function install_php {
+  apt-get install -q -y --force-yes php5 php5-fpm php-pear php5-common php5-mcrypt php5-mysql php5-cli php5-gd php5-cgi php5-curl
+  sed -i "/listen *=/clisten = 127.0.0.1:9000"  /etc/php5/fpm/pool.d/www.conf
+}
+
+function install_mysql {
+  apt-get -y install mysql-server mysql-client
 }
 
 function add_static_website {
@@ -53,8 +49,54 @@ server {
     root /var/www/$domain_name;
 }
 END
-
 }
+
+function add_php_website {
+  domain_name=$1
+  mkdir /var/www
+  mkdir /var/www/$domain_name
+  echo "<html><title>My Website</title><body><h1>My Website $domain_name </h1>Welcome it works</body></html>" > /var/www/$domain_name/index.html
+  cat > /etc/nginx/sites-enabled/$domain_name.conf <<END
+server {
+    listen 80;
+    server_name $domain_name www.$domain_name;
+    access_log /var/log/nginx/access.log;
+    error_log /var/log/nginx/error.log;
+    root /var/www/$domain_name;
+
+    index index.php index.htm index.html;
+    location ~ \.php\$ {
+	try_files \$uri =404;
+	fastcgi_split_path_info ^(.+\.php)(/.+)\$;
+	include fastcgi_params;
+	fastcgi_index index.php;
+	fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
+	fastcgi_pass 127.0.0.1:9000;
+    }
+}
+END
+}
+
+function help {
+  echo -en "\ec"
+  echo "-------------------------------------------------------------------------------------------------------"
+  echo "bash setup.sh init                                                                                     "
+  echo "	Initialize the  System - Update the system, remove unwanted programs and install useful ones   "
+  echo "bash setup.sh install_nginx                                                                            "
+  echo "	Install NGINX webserver                                                                        "
+  echo "bash setup.sh install_php                                                                              "
+  echo "	Install PHP Support                                                                            "
+  echo "bash setup.sh install_mysql                                                                            "
+  echo "	Install MySQL Database                                                                         "
+  echo "bash setup.sh add_static_website domain.tld                                                            "
+  echo "	Setup a static website given a domain name.                                                    "
+  echo "	E.g. bash setup.sh add_static_website abc.com                                                  "
+  echo "bash setup.sh add_php_website domain.tld                                                               "
+  echo "	Setup a PHP website given a domain name.                                                       "
+  echo "	E.g. bash setup.sh add_php_website abc.com                                                     "
+  echo "-------------------------------------------------------------------------------------------------------"
+}
+
 
 case $1 in
 	help)
@@ -66,8 +108,17 @@ case $1 in
 	install_nginx)
 		install_nginx
 	;;
+	install_php)
+		install_php
+	;;
+	install_mysql)
+		install_mysql
+	;;
 	add_static_website)
 		add_static_website $2
+	;;
+	add_php_website)
+		add_php_website $2
 	;;
 	*)
 		help
