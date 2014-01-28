@@ -87,7 +87,7 @@ function add_wp_website {
 
   # prepare web files
   mkdir -p /var/www
-  cd -p /var/www
+  cd /var/www
   wget http://wordpress.org/latest.zip
   unzip latest.zip
   rm latest.zip
