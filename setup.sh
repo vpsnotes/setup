@@ -74,6 +74,45 @@ server {
 END
 }
 
+function add_wp_website {
+  domain_name=$1
+  db_name=$2
+
+  # get wp template config
+  cd /etc/nginx
+  wget -nc https://raw.github.com/vpsnotes/setup/master/nginx/wordpress.conf
+
+  #db 
+  echo "create schema $db_name;" | mysql -u root -ppassword
+
+  # prepare web files
+  mkdir -p /var/www
+  cd -p /var/www
+  wget http://wordpress.org/latest.zip
+  unzip latest.zip
+  rm latest.zip
+  mv wordpress $domain_name
+
+  #ownership
+  cd /var/www
+  chown -R www-data: $domain_name
+
+  # nginx conf
+  cat > /etc/nginx/sites-enabled/$domain_name.conf <<END
+server {
+    listen 80;
+    server_name $domain_name www.$domain_name;
+    access_log /var/log/nginx/access.log;
+    error_log /var/log/nginx/error.log;
+    root /var/www/$domain_name;
+
+    index index.php index.htm index.html;
+    include wordpress.conf;
+}
+END
+
+}
+
 function help {
   echo -en "\ec"
   echo "-------------------------------------------------------------------------------------------------------"
@@ -116,6 +155,9 @@ case $1 in
 	;;
 	add_php_website)
 		add_php_website $2
+	;;
+	add_wp_website)
+		add_wp_website $2 $3
 	;;
 	*)
 		help
