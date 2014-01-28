@@ -130,6 +130,9 @@ function help {
   echo "bash setup.sh add_php_website domain.tld                                                               "
   echo "	Setup a PHP website given a domain name.                                                       "
   echo "	E.g. bash setup.sh add_php_website abc.com                                                     "
+  echo "bash setup.sh add_wp_website domain.tld dbname                                                         "
+  echo "	Setup a WOrdpress website                                                                      "
+  echo "	E.g. bash setup.sh add_wp_website abc.com abcdb                                                "
   echo "-------------------------------------------------------------------------------------------------------"
 }
 
