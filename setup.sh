@@ -55,7 +55,7 @@ function add_php_website {
   domain_name=$1
   mkdir /var/www
   mkdir /var/www/$domain_name
-  echo "<html><title>My Website</title><body><h1>My Website $domain_name </h1>Welcome it works</body></html>" > /var/www/$domain_name/index.html
+  echo "<?php phpinfo(); ?>" > /var/www/$domain_name/index.html
   cat > /etc/nginx/sites-enabled/$domain_name.conf <<END
 server {
     listen 80;
